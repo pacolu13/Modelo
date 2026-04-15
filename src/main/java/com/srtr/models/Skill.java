@@ -1,7 +1,5 @@
 package com.srtr.models;
 
-import java.util.List;
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -15,14 +13,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 
-@Document(collection = "users")
-public class User {
+@Document(collection = "skills")
+public class Skill {
 
     @Id
     private String id;
     private String name;
-    private String email;
-    private List<String> skills; // List of skill IDs possessed by the user
-    private List<String> connections; // List of user IDs who are connected to this user
-    private List<String> appliedJobs; // List of job IDs the user has applied for
+    private String category;
 }
