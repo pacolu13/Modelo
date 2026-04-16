@@ -80,8 +80,11 @@ public class RecommendationService {
 
         User fromUser = userService.getUserById(userId);
         List<Skill> fromUserSkills = skillService.getAllSkillsByUserId(userId);
+        Set<Skill> fromUserSkillsSet = new HashSet<>();
 
-        // Añadimos las skills del user al set
+        for(Skill skill: fromUserSkills){
+            fromUserSkillsSet.add(skill);
+        }
 
         List<String> connections = fromUser.getConnections();
 
@@ -92,9 +95,22 @@ public class RecommendationService {
             User toUser = userService.getUserById(connection.getToUser());
             List<Skill> toUserSkills = skillService.getAllSkillsByUserId(toUser.getId());
 
-            // por cada aparicion distinta del set de skills, añadimos la skill y si ya
-            // existe aumentamos
-            // la aparicion en 1. por ultimo filtramos las de mayor aparicion
+
+            for (Skill skill: toUserSkills){
+                if (!fromUserSkillsSet.contains(skill)){
+                    if(skillRecommended.containsKey(skill)){
+                        Integer cant = skillRecommended.get(skill);
+                        skillRecommended.replace(skill,cant + 1);
+                    }else{
+                        skillRecommended.put(skill,1);
+                    }
+                }
+            }
         }
+        return skillRecommended.entrySet()
+            .stream()
+            .sorted((a, b) -> Double.compare(b.getValue(), a.getValue()))
+            .limit(5).map(entry -> entry.getKey()).toList();
+        
     }
 }
