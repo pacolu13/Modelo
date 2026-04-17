@@ -10,8 +10,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data // Lombok annotation to generate getters, setters, toString, equals, and
-      // hashCode methods
+@Data // Lombok generate getters, setters, toString, equals, hashCode methods
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -23,6 +22,8 @@ public class Job {
     private String id;
     private String title;
     private String company;
-    private List<String> requiredSkills; // List of skill IDs required for the job
+    private Integer requiredExp, desirableExp;
+    private List<SeniorityType> requiredSeniority, desirableSeniority; // List of Seniority Type Enum for the job
+    private List<String> requiredSkills, desirableSkills; // List of skill IDs required for the job
     private List<String> aplicants; // List of user IDs who have applied for the job
 }

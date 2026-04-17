@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -24,28 +25,100 @@ public class RecommendationService {
     private final JobService jobService;
     private final SkillService skillService;
 
+    // Variables constantes
+    private static final double REQUIRED_WEIGHT = 0.7;
+    private static final double DESIRABLE_WEIGHT = 0.3;
+
+    private static final double SENIORITY_SCORE = 1.0;
+
+    private static final double EXP_SCORE = 1.0;
+
+    private static final double REQUIRED_SKILL_THRESHOLD = 0.5;
+    private static final double REQUIRED_SKILL_PENALTY = 0.15;
+
     public List<Job> recommendJobsForUser(String userId) {
 
+        User user = userService.getUserById(userId);
         List<Job> allJobs = jobService.GetJobsRequireAtLeastOneSkill(userId);
-        List<Skill> userSkills = skillService.getAllSkillsByUserId(userId);
-
-        Set<Skill> userSkillsSet = new HashSet<>(userSkills);
-        Map<Job, Double> jobScores = new HashMap<>();
-
-        for (Job job : allJobs) {
-
-            long matchCount = job.getRequiredSkills().stream().filter(userSkillsSet::contains).count();
-            int totalRequired = job.getRequiredSkills().size();
-            double score = (double) matchCount / totalRequired;
-
-            jobScores.put(job, score);
-        }
+        Map<Job, Double> jobScores = getScore(user, allJobs);
 
         return jobScores.entrySet().stream()
                 .sorted((a, b) -> Double.compare(b.getValue(), a.getValue()))
                 .limit(5)
                 .map(entry -> entry.getKey())
                 .toList();
+    }
+
+    private Map<Job, Double> getScore(User user, List<Job> jobs) {
+
+        Map<Job, Double> jobScores = new HashMap<>();
+        Set<Skill> skillsUser = user.getSkills().stream().collect(Collectors.toSet());
+
+        for (Job job : jobs) {
+
+            double score = 0.0;
+            score = userSkillsMatchScore(skillsUser, job, score);
+            score = userSeniorityScore(user, job, score);
+            score = userExpScore(user, job, score);
+
+            jobScores.put(job, score);
+        }
+
+        return jobScores;
+    }
+
+    /*
+     * Metodo para analizar el match skill del user.
+     */
+    private double userSkillsMatchScore(Set<Skill> skillsUser, Job job, double score) {
+        long matchRequired = job.getRequiredSkills().stream()
+                .filter(skillsUser::contains)
+                .count();
+
+        int totalRequired = job.getRequiredSkills().size();
+
+        double requiredRatio = totalRequired == 0 ? 0 : ((double) matchRequired / totalRequired);
+
+        score += requiredRatio * REQUIRED_WEIGHT;
+
+        if (requiredRatio < REQUIRED_SKILL_THRESHOLD) {
+            score -= REQUIRED_SKILL_PENALTY;
+        }
+
+        long matchDesirable = job.getDesirableSkills().stream()
+                .filter(skillsUser::contains)
+                .count();
+
+        int totalDesirable = job.getDesirableSkills().size();
+
+        double desirableRatio = totalDesirable == 0 ? 0 : ((double) matchDesirable / totalDesirable);
+
+        score += desirableRatio * DESIRABLE_WEIGHT;
+        return score;
+    }
+
+    /*
+     * Metodo para analizar la experiencia del user.
+     */
+    private double userExpScore(User user, Job job, double score) {
+        if (job.getRequiredExp() <= user.getExperienceYears()) {
+            score += EXP_SCORE;
+        } else if (job.getDesirableExp() <= user.getExperienceYears()) {
+            score += EXP_SCORE / 2;
+        }
+        return score;
+    }
+
+    /*
+     * Metodo para analizar el seniority del user.
+     */
+    private double userSeniorityScore(User user, Job job, double score) {
+        if (job.getRequiredSeniority().contains(user.getSeniority())) {
+            score += SENIORITY_SCORE;
+        } else if (job.getDesirableSeniority().contains(user.getSeniority())) {
+            score += SENIORITY_SCORE / 2;
+        }
+        return score;
     }
 
     public List<User> recommendedUsersForUser(String userId) {

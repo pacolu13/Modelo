@@ -45,7 +45,7 @@ public class JobService {
     public List<Job> GetJobsRequireAtLeastOneSkill(String userId) {
         User user = userRepository.findById(userId).orElse(null);
         List<Job> jobs = jobRepository.findAll();
-        List<String> userSkills = user.getSkills();
+        List<Skill> userSkills = user.getSkills();
 
         List<Job> recommendedJobs = jobs.stream()
                 .filter(job -> job.getRequiredSkills()

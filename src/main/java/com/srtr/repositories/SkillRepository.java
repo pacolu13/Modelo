@@ -11,4 +11,6 @@ import com.srtr.models.Skill;
 public interface SkillRepository extends MongoRepository<Skill, String> {
 
     List<Skill> getAllSkillsByUserId(String id);
+
+    List<Skill> getAllSkillsByName(String name);
 }

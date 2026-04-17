@@ -38,4 +38,8 @@ public class SkillService {
     public List<Skill> getAllSkillsByUserId(String userId) {
         return skillRepository.getAllSkillsByUserId(userId);
     }
+
+    public List<Skill> getAllSkillsByName(String name){
+        return skillRepository.getAllSkillsByName(name);
+    }
 }
