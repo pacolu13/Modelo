@@ -64,7 +64,6 @@ public class RecommendationService {
             long matchCount = user.getSkills().stream().filter(userSkillsSet::contains).count();
             int totalUserSkills = user.getSkills().size();
             double score = (double) matchCount / totalUserSkills;
-
             userRecommended.put(user, score);
         }
 
@@ -82,7 +81,7 @@ public class RecommendationService {
         List<Skill> fromUserSkills = skillService.getAllSkillsByUserId(userId);
         Set<Skill> fromUserSkillsSet = new HashSet<>();
 
-        for(Skill skill: fromUserSkills){
+        for (Skill skill : fromUserSkills) {
             fromUserSkillsSet.add(skill);
         }
 
@@ -95,22 +94,20 @@ public class RecommendationService {
             User toUser = userService.getUserById(connection.getToUser());
             List<Skill> toUserSkills = skillService.getAllSkillsByUserId(toUser.getId());
 
-
-            for (Skill skill: toUserSkills){
-                if (!fromUserSkillsSet.contains(skill)){
-                    if(skillRecommended.containsKey(skill)){
+            for (Skill skill : toUserSkills) {
+                if (!fromUserSkillsSet.contains(skill)) {
+                    if (skillRecommended.containsKey(skill)) {
                         Integer cant = skillRecommended.get(skill);
-                        skillRecommended.replace(skill,cant + 1);
-                    }else{
-                        skillRecommended.put(skill,1);
+                        skillRecommended.replace(skill, cant + 1);
+                    } else {
+                        skillRecommended.put(skill, 1);
                     }
                 }
             }
         }
         return skillRecommended.entrySet()
-            .stream()
-            .sorted((a, b) -> Double.compare(b.getValue(), a.getValue()))
-            .limit(5).map(entry -> entry.getKey()).toList();
-        
+                .stream()
+                .sorted((a, b) -> Double.compare(b.getValue(), a.getValue()))
+                .limit(5).map(entry -> entry.getKey()).toList();
     }
 }
