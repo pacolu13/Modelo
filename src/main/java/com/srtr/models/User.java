@@ -27,5 +27,5 @@ public class User {
     private List<Skill> skills; // List of skill IDs possessed by the user
     private List<String> connections; // List of user IDs who are connected to this user
     private List<String> appliedJobs; // List of job IDs the user has applied for
-    private List<String> posts;
+    private List<Post> posts;
 }

@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 import com.srtr.models.Connection;
 import com.srtr.models.Job;
+import com.srtr.models.Post;
+import com.srtr.models.PostSearchData;
 import com.srtr.models.Skill;
 import com.srtr.models.User;
 
@@ -24,6 +26,7 @@ public class RecommendationService {
     private final ConnectionService connectionService;
     private final JobService jobService;
     private final SkillService skillService;
+    private final PostAnalysisService postAnalysisService;
 
     // Variables constantes
     private static final double REQUIRED_WEIGHT = 0.7;
@@ -60,6 +63,7 @@ public class RecommendationService {
             score = userSkillsMatchScore(skillsUser, job, score);
             score = userSeniorityScore(user, job, score);
             score = userExpScore(user, job, score);
+            score = userPostScore(user, job, score);
 
             jobScores.put(job, score);
         }
@@ -117,6 +121,16 @@ public class RecommendationService {
             score += SENIORITY_SCORE;
         } else if (job.getDesirableSeniority().contains(user.getSeniority())) {
             score += SENIORITY_SCORE / 2;
+        }
+        return score;
+    }
+
+    private double userPostScore(User user, Job job, double score) {
+        List<Post> posts = user.getPosts();
+        for (Post post : posts) {
+            PostSearchData dataPost = postAnalysisService.analyzePost(post);
+            Set<Skill> userSkillsPost = dataPost.getSkillsMatcher().stream().collect(Collectors.toSet());
+            score = userSkillsMatchScore(userSkillsPost, job, score);
         }
         return score;
     }
