@@ -1,10 +1,11 @@
 package com.srtr.models;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Set;
 
+import org.neo4j.ogm.annotation.Relationship;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.neo4j.core.schema.Node;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,16 +17,20 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 
-
-@Document(collection = "publications")
+@Node("Post")
 public class Post {
+
     @Id
     private String id;
-    private String userId;
-    private String title; 
+    private String title;
     private String description;
     private String body;
-    private String type;
-    private List<String> tags;
+    private String type; // Ej: "Informativo", "Búsqueda", etc.
     private LocalDate createdAt;
+
+    @Relationship(type = "AUTHORED_BY", direction = Relationship.Direction.OUTGOING)
+    private User author; // Ya no es String userId
+
+    @Relationship(type = "TAGGED_WITH", direction = Relationship.Direction.OUTGOING)
+    private Set<Skill> tags; // Ahora puedes navegar de un Post a una Skill
 }

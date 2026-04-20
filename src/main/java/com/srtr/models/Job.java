@@ -1,9 +1,11 @@
 package com.srtr.models;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.neo4j.core.schema.Node;
+import org.springframework.data.neo4j.core.schema.Relationship;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 
-@Document(collection = "jobs")
+@Node("Job")
 public class Job {
 
     @Id
@@ -23,7 +25,13 @@ public class Job {
     private String title;
     private String company;
     private Integer requiredExp, desirableExp;
-    private List<SeniorityType> requiredSeniority, desirableSeniority; // List of Seniority Type Enum for the job
-    private List<String> requiredSkills, desirableSkills; // List of skill IDs required for the job
-    private List<String> aplicants; // List of user IDs who have applied for the job
+
+    // El Seniority puede ser un atributo o un Nodo si quieres filtrar rápido
+    private List<SeniorityType> requiredSeniority, desirableSeniority;
+
+    @Relationship(type = "REQUIRES_SKILL", direction = Relationship.Direction.OUTGOING)
+    private Set<Skill> skills; // Aquí usaremos una clase de relación para distinguir "Required" de "Desirable"
+
+    @Relationship(type = "HAS_APPLICANT", direction = Relationship.Direction.INCOMING)
+    private Set<User> applicants;
 }

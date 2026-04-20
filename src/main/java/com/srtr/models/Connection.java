@@ -1,7 +1,11 @@
 package com.srtr.models;
 
+import java.time.LocalDate;
+
+import org.neo4j.ogm.annotation.GeneratedValue;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.neo4j.core.schema.RelationshipProperties;
+import org.springframework.data.neo4j.core.schema.TargetNode;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,12 +17,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 
-@Document(collection = "connections")
+@RelationshipProperties
 public class Connection {
-
-    @Id
-    private String id;
-    private String fromUser;
-    private String toUser;
-    private String status; // "pending", "accepted", "rejected"
+    @Id @GeneratedValue private Long id;
+    @TargetNode private User toUser;
+    private String status; // "pending", "accepted"
+    private LocalDate since;
 }
