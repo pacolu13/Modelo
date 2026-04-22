@@ -23,7 +23,6 @@ import lombok.AllArgsConstructor;
 public class RecommendationService {
 
     private final UserService userService;
-    private final ConnectionService connectionService;
     private final JobService jobService;
     private final SkillService skillService;
     private final PostAnalysisService postAnalysisService;
